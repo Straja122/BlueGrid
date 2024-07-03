@@ -1,0 +1,91 @@
+
+/**
+ * setResponseValue
+ * @param {string} key - key of cookie
+ * @param {string} value - value of cookie
+ * @param {string} [path] - path of cookie
+ * @param {number} [expiration] - expiration of cookie in seconds or default will be used
+ * @returns {dw.web.Cookie|undefined} - api Cookie object
+ */
+function setResponseValue(key, value, path, expiration) {
+    if (key && value) {
+        const cookie = new Cookie(key, value);
+
+        cookie.setPath(path || '/');
+        cookie.setMaxAge(expiration || expireDate);
+        cookie.setSecure(true);
+        response.addHttpCookie(cookie);
+
+        return cookie;
+    }
+}
+
+/**
+ * addItem
+ * @param {Object} obj - object that a new item, leaf is added to
+ * @param {URL} url - url that is used to extract the object path for the new value
+ * @param {string} ipAddress - root key of the object
+ * @returns {Object} - object with added new leaf
+ */
+function addItem(obj, url, ipAddress) {
+    let keyPath = [ipAddress];
+    const path = url.pathname;
+    let pathArray = path.split('/');
+    //remove the empty string from the path array
+    if (url.pathname.charAt(url.pathname.length - 1) == '/') {
+        pathArray = pathArray.slice(1, -1);
+    } else {
+        pathArray.shift();
+    }
+    pathArray.unshift(ipAddress);
+
+    for (let i = 1; i < pathArray.length; i++) {
+        let value = pathArray[i];
+        //addToNestedJson(obj,keyPath, key,value);
+        addToNestedJson(obj, keyPath, value);
+        keyPath.push(pathArray[i]);
+    }
+
+    return obj;
+
+}
+
+function addToNestedJson(obj, keys, newValue) {
+    let current = obj;
+
+    for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        if (!current.hasOwnProperty(key)) {
+            if (i === keys.length - 1) {
+                current[key] = [];
+            } else {
+                current[key] = {};
+            }
+        } else if (!Array.isArray(current[key])) {
+            // Convert existing value to array if it's not already an array
+            current[key] = [current[key]];
+        }
+        current = current[key];
+    }
+
+    // Add the new value to the array if it doesn't already exist
+    if (!current.includes(newValue)) {
+        current.push(newValue);
+    }
+}
+
+/**
+ * getIpAddressFromUrl
+ * @param {String} url - Url that is used for extracting the base ip address
+ * @returns {String} - home ip address
+ */
+function getIpAddressFromUrl(url) {
+    let baseUrl = new URL(url);
+    return baseUrl.host.split(':')[0];
+}
+
+module.exports = {
+    addItem: addItem,
+    addToNestedJson: addToNestedJson,
+    getIpAddressFromUrl: getIpAddressFromUrl
+};
