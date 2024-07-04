@@ -1,25 +1,3 @@
-
-/**
- * setResponseValue
- * @param {string} key - key of cookie
- * @param {string} value - value of cookie
- * @param {string} [path] - path of cookie
- * @param {number} [expiration] - expiration of cookie in seconds or default will be used
- * @returns {dw.web.Cookie|undefined} - api Cookie object
- */
-function setResponseValue(key, value, path, expiration) {
-    if (key && value) {
-        const cookie = new Cookie(key, value);
-
-        cookie.setPath(path || '/');
-        cookie.setMaxAge(expiration || expireDate);
-        cookie.setSecure(true);
-        response.addHttpCookie(cookie);
-
-        return cookie;
-    }
-}
-
 /**
  * addItem
  * @param {Object} obj - object that a new item, leaf is added to
